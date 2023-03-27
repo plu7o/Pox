@@ -1,6 +1,5 @@
-from .expr import Expr
+from Eval.expressions import Expr
 
-length = 0
 
 class AstPrinter(Expr.Visitor):
     def print_ast(self, expr: Expr) -> str:

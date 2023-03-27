@@ -1,4 +1,4 @@
-from Parser.expr import Expr
+from Eval.expressions import Expr
 from Lexer.token_type import TokenType
 from Lexer.token import Token
 from Errors.runtime_error import Runtime_error
@@ -13,6 +13,12 @@ class Interpreter(Expr.Visitor):
             from pox import Pox
 
             Pox.runtime_error(error)
+
+    def visit_assign_expr(self, expr):
+        raise NotImplemented
+
+    def visit_variable_expr(self, expr):
+        raise NotImplemented
 
     def visit_literal_expr(self, expr: Expr.Literal) -> object:
         return expr.value
@@ -105,7 +111,9 @@ class Interpreter(Expr.Visitor):
             case TokenType.SLASH:
                 self.check_number_operands(expr.operator, left, right)
                 if left == 0 or right == 0:
-                    raise Runtime_error(expr.operator, f'Trying to devide by Zero: {left} / {right}')
+                    raise Runtime_error(
+                        expr.operator, f"Trying to devide by Zero: {left} / {right}"
+                    )
                 return float(left) / float(right)
             case TokenType.STAR:
                 self.check_number_operands(expr.operator, left, right)

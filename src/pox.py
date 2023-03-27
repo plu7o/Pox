@@ -2,7 +2,7 @@ import sys
 from Lexer.lexer import Lexer
 from Lexer.token import Token
 from Lexer.token_type import TokenType
-from Parser.expr import Expr
+from Eval.expressions import Expr
 from Parser.ast_printer import AstPrinter
 from Parser.parser import Parser
 from Interpreter.interpreter import Interpreter

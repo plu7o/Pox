@@ -1,6 +1,6 @@
 from Lexer.token_type import TokenType
 from Lexer.token import Token
-from .expr import Expr
+from Eval.expressions import Expr
 
 
 class Parse_error(Exception):
