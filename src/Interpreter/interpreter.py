@@ -1,14 +1,15 @@
 from Eval.expressions import Expr
+from Eval.statements import Stmt
 from Lexer.token_type import TokenType
 from Lexer.token import Token
 from Errors.runtime_error import Runtime_error
 
 
-class Interpreter(Expr.Visitor):
-    def interpret(self, expression: Expr):
+class Interpreter(Expr.Visitor, Stmt.Visitor):
+    def interpret(self, statements: list[Stmt]):
         try:
-            value = self.evaluate(expression)
-            print(self.stringify(value))
+            for statement in statements:
+                self.execute(statement)
         except Runtime_error as error:
             from pox import Pox
 
@@ -79,6 +80,16 @@ class Interpreter(Expr.Visitor):
 
     def evaluate(self, expr: Expr) -> object:
         return expr.accept(self)
+
+    def execute(self, stmt: Stmt):
+        stmt.accept(self)
+
+    def visit_expression_stmt(self, stmt: Stmt.Expression):
+        self.evaluate(stmt.expression)
+
+    def visit_print_stmt(self, stmt: Stmt.Print):
+        value = self.evaluate(stmt.expression)
+        print(self.stringify(value))
 
     def visit_binary_expr(self, expr: Expr.Binary) -> object:
         left = self.evaluate(expr.left)

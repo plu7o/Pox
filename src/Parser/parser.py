@@ -24,7 +24,7 @@ class Parser:
         return self.equality()
 
     def statement(self) -> Stmt:
-        if self.match(TokenType.PRINT):
+        if self.match((TokenType.PRINT,)):
             return self.print_statement()
         
         return self.expression_statement()

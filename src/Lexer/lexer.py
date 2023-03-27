@@ -150,10 +150,10 @@ class Lexer:
 
             Pox.lexer_error(self.line, f"Unterminated string.")
 
-        
-        self.advance()
-        value = self.source[self.start + 1 : self.current - 1].strip("'")
-        self.add_token(TokenType.STRING, value)
+        else:
+            self.advance()
+            value = self.source[self.start + 1 : self.current - 1].strip("'")
+            self.add_token(TokenType.STRING, value)
 
     def match(self, expected: str) -> bool:
         if self.is_at_eof():

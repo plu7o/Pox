@@ -32,9 +32,9 @@ class Stmt(ABC):
         # def visit_return_stmt(self, stmt):
         #    pass
 
-        @abstractmethod
-        def visit_var_stmt(self, stmt):
-            pass
+        #@abstractmethod
+        #def visit_var_stmt(self, stmt):
+        #    pass
 
         # @abstractmethod
         # def visit_while_stmt(self, stmt):

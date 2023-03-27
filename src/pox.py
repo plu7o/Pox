@@ -49,12 +49,12 @@ class Pox:
         lexer = Lexer(source)
         tokens = lexer.scan_tokens()
         parser = Parser(tokens)
-        expression = parser.parse()
+        statements = parser.parse()
 
         if self.had_error:
             return
 
-        self.interpreter.interpret(expression)
+        self.interpreter.interpret(statements)
 
     @classmethod
     def lexer_error(self, line: int, message: str) -> None:
