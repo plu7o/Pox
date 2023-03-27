@@ -1,6 +1,7 @@
 from Lexer.token_type import TokenType
 from Lexer.token import Token
 from Eval.expressions import Expr
+from Eval.statements import Stmt
 
 
 class Parse_error(Exception):
@@ -12,14 +13,30 @@ class Parser:
         self.tokens = tokens
         self.current = 0
 
-    def parse(self):
-        try:
-            return self.expression()
-        except Parse_error:
-            return None
+    def parse(self) -> list[Stmt]:
+        statements = []
+        while not self.is_at_end():
+            statements.append(self.statement())
+
+        return statements
 
     def expression(self) -> Expr:
         return self.equality()
+
+    def statement(self) -> Stmt:
+        if self.match(TokenType.PRINT):
+            return self.print_statement()
+        
+        return self.expression_statement()
+
+    def print_statement(self) -> Stmt:
+        value = self.expression()
+        self.consume(TokenType.SEMICOLON, 'Expected ";" after value')
+        return Stmt.Print(value)
+
+    def expression_statement(self) -> Stmt:
+        expr = self.expression()
+        self.consume(TokenType.SEMICOLON, 'Expected ";" after expression.')
 
     def equality(self) -> Expr:
         expr = self.comparison()
