@@ -91,10 +91,10 @@ class Parser:
 
         if self.match((TokenType.LEFT_PAREN,)):
             expr = self.expression()
-            self.consume(TokenType.RIGHT_PAREN, 'Expect ")" after expression')
+            self.consume(TokenType.RIGHT_PAREN, 'Expected ")" after expression.')
             return Expr.Grouping(expr)
 
-        raise self.error(self.peek(), "Expect expression")
+        raise self.error(self.peek(), "Expected expression.")
 
     def match(self, types: tuple[TokenType]) -> bool:
         for token_type in types:
