@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import re
 from Lexer.token import Token
 
 
