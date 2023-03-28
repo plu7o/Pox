@@ -57,18 +57,18 @@ class Pox:
         self.interpreter.interpret(statements)
 
     @classmethod
-    def lexer_error(self, line: int, message: str) -> None:
+    def lexer_error(cls, line: int, message: str) -> None:
         def report(line: int, where: str, message: str):
             print(f"[Line: {line}] Error {where}: {message}")
-            self.had_error = True
+            cls.had_error = True
 
         report(line, "", message)
 
     @classmethod
-    def parse_error(self, token: Token, message: str) -> None:
+    def parse_error(cls, token: Token, message: str) -> None:
         def report(line: int, where: str, message: str):
             print(f"[Line: {line}] Error {where}: {message}")
-            self.had_error = True
+            cls.had_error = True
 
         if token.token_type == TokenType.EOF:
             report(token.line, " at end", message)
@@ -76,9 +76,9 @@ class Pox:
             report(token.line, f' at "{token.lexeme}"', message)
 
     @classmethod
-    def runtime_error(self, error: Runtime_error):
+    def runtime_error(cls, error: Runtime_error):
         print(f'[Line {error.token.line}]: Runtime Error: {error.message}')
-        self.had_runtime_error = True
+        cls.had_runtime_error = True
 
 
 if __name__ == "__main__":
