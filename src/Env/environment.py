@@ -3,7 +3,7 @@ from Lexer.token import Token
 
 
 class Environment:
-    def __init__(self, enclosing: Environment = None) -> None:
+    def __init__(self, enclosing=None) -> None:
         self.enclosing = enclosing
         self.values = {}
 

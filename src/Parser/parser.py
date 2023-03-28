@@ -62,11 +62,11 @@ class Parser:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, 'Expected ";" after expression.')
 
-    def block(self) list[Stmt]:
+    def block(self) -> list[Stmt]:
         statements = []
 
         while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
-            self.statements.append(self.declaration())
+            statements.append(self.declaration())
 
         self.consume(TokenType.RIGHT_BRACE, 'Expected "}" after block')
         return statements

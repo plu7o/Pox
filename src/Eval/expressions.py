@@ -58,7 +58,7 @@ class Expr(ABC):
     def accept(self, visitor: Visitor):
         pass
 
-    class Assing:
+    class Assign:
         def __init__(self, name: Token, value):
             self.name = name
             self.value = value

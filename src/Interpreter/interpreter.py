@@ -88,6 +88,21 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
     def execute(self, stmt: Stmt):
         stmt.accept(self)
 
+    def execute_block(self, statements: list[Stmt], env: Environment):
+        previous = self.env
+        try:
+            self.env = env
+
+            for statement in statements:
+                self.execute(statement)
+
+        finally:
+            self.env = previous
+
+    def visit_block_stmt(stmt: Stmt.Block):
+        self.execute_block(stmt.statements, Environment(self.env))
+        return None
+
     def visit_expression_stmt(self, stmt: Stmt.Expression):
         self.evaluate(stmt.expression)
 
