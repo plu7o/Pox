@@ -21,7 +21,7 @@ class Parser:
         return statements
 
     def expression(self) -> Expr:
-        return self.equality()
+        return self.assignment()
 
     def declaration(self) -> Stmt:
         try:
@@ -57,6 +57,21 @@ class Parser:
     def expression_statement(self) -> Stmt:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, 'Expected ";" after expression.')
+
+    def assignment(self) -> Expr:
+        expr = self.equality()
+
+        if self.match((TokenType.EQUAL,)):
+            euqals = self.previous()
+            value = self.assignment()
+
+            if isinstance(expr, Expr.Variable):
+                name = expr.name
+                return Expr.Assign(name, value)
+
+            self.error(equals, "Invalid assignment target.")
+
+        return expr
 
     def equality(self) -> Expr:
         expr = self.comparison()
