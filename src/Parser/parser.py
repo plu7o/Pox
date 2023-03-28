@@ -16,23 +16,43 @@ class Parser:
     def parse(self) -> list[Stmt]:
         statements = []
         while not self.is_at_end():
-            statements.append(self.statement())
+            statements.append(self.declaration())
 
         return statements
 
     def expression(self) -> Expr:
         return self.equality()
 
+    def declaration(self) -> Stmt:
+        try:
+            if self.match((TokenType.LET,)):
+                return self.var_declaration
+
+            return self.statement()
+        except Parse_error as error:
+            self.sync()
+            return None
+
     def statement(self) -> Stmt:
         if self.match((TokenType.PRINT,)):
             return self.print_statement()
-        
+
         return self.expression_statement()
 
     def print_statement(self) -> Stmt:
         value = self.expression()
         self.consume(TokenType.SEMICOLON, 'Expected ";" after value')
         return Stmt.Print(value)
+
+    def var_declaration(self) -> Stmt:
+        name = self.consume(TokenType.IDENIFIER, "Expected variable name")
+        initializer = None
+
+        if self.match((TokenType.EQUAL,)):
+            initializer = self.expression()
+
+        self.consume(TokenType.SEMICOLON, 'Expected ";" after variable declaration')
+        return Stmt.Var(name, initializer)
 
     def expression_statement(self) -> Stmt:
         expr = self.expression()
@@ -105,6 +125,9 @@ class Parser:
 
         if self.match((TokenType.NUMBER, TokenType.STRING)):
             return Expr.Literal(self.previous().literal)
+
+        if self.match((TokenType.IDENTIFIER,)):
+            return Expr.Variable(self.previous())
 
         if self.match((TokenType.LEFT_PAREN,)):
             expr = self.expression()
