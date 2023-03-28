@@ -6,8 +6,15 @@ class Environment:
         self.values = {}
 
     def get(self, name: Token) -> object:
-        if self.values.get(name.lexeme) is not None:
+        if name.lexeme in self.values:
             return self.values[name.lexeme]
+
+        raise Runtime_error(name, f'Undefined variable "{name.lexeme}".')
+
+    def assign(self, name: Token, value: object) -> object:
+        if name.lexeme in self.values:
+            self.values[name.lexeme] = value
+            return
 
         raise Runtime_error(name, f'Undefined variable "{name.lexeme}".')
 

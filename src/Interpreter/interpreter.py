@@ -103,6 +103,11 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         self.env.define(stmt.name.lexeme, value)
         return None
 
+    def visit_assign_expr(self, expr: Expr.Assign) -> object:
+        value = self.evaluate(expr.value)
+        self.env.assign(expr.name, value)
+        return value
+
     def visit_binary_expr(self, expr: Expr.Binary) -> object:
         left = self.evaluate(expr.left)
         right = self.evaluate(expr.right)
