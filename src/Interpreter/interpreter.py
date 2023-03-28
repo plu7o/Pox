@@ -3,9 +3,13 @@ from Eval.statements import Stmt
 from Lexer.token_type import TokenType
 from Lexer.token import Token
 from Errors.runtime_error import Runtime_error
+from Env.environment import Environment
 
 
 class Interpreter(Expr.Visitor, Stmt.Visitor):
+    def __init__(self) -> None:
+        self.env = Environment()
+
     def interpret(self, statements: list[Stmt]):
         try:
             for statement in statements:
@@ -16,9 +20,6 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
             Pox.runtime_error(error)
 
     def visit_assign_expr(self, expr):
-        raise NotImplemented
-
-    def visit_variable_expr(self, expr):
         raise NotImplemented
 
     def visit_literal_expr(self, expr: Expr.Literal) -> object:
@@ -37,6 +38,9 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
 
         # unreachable
         return None
+
+    def visit_variable_expr(self, expr: Expr.Variable):
+        return self.env.get(expr.name)
 
     def check_number_operand(self, operator: Token, operand: object) -> None:
         if isinstance(operand, float):
@@ -90,6 +94,14 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
     def visit_print_stmt(self, stmt: Stmt.Print):
         value = self.evaluate(stmt.expression)
         print(self.stringify(value))
+
+    def visit_var_stmt(self, stmt: Stmt.Var):
+        value = None
+        if stmt.initializer != None:
+            value = self.evaluate(stmt.initializer)
+
+        self.env.define(stmt.name.lexeme, value)
+        return None
 
     def visit_binary_expr(self, expr: Expr.Binary) -> object:
         left = self.evaluate(expr.left)

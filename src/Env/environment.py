@@ -6,8 +6,8 @@ class Environment:
         self.values = {}
 
     def get(self, name: Token) -> object:
-        if name.lexeme in self.values:
-            return self.values[name.lexeme]:
+        if self.values.get(name.lexeme) is not None:
+            return self.values[name.lexeme]
 
         raise Runtime_error(name, f'Undefined variable "{name.lexeme}".')
 

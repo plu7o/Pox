@@ -32,9 +32,9 @@ class Stmt(ABC):
         # def visit_return_stmt(self, stmt):
         #    pass
 
-        #@abstractmethod
-        #def visit_var_stmt(self, stmt):
-        #    pass
+        @abstractmethod
+        def visit_var_stmt(self, stmt):
+            pass
 
         # @abstractmethod
         # def visit_while_stmt(self, stmt):
@@ -68,7 +68,7 @@ class Stmt(ABC):
     class Var:
         def __init__(self, name, initializer):
             self.name = name
-            self.initalizer = initializer
+            self.initializer = initializer
 
         def accept(self, visitor):
             return visitor.visit_var_stmt(self)

@@ -26,7 +26,7 @@ class Parser:
     def declaration(self) -> Stmt:
         try:
             if self.match((TokenType.LET,)):
-                return self.var_declaration
+                return self.var_declaration()
 
             return self.statement()
         except Parse_error as error:
@@ -45,7 +45,7 @@ class Parser:
         return Stmt.Print(value)
 
     def var_declaration(self) -> Stmt:
-        name = self.consume(TokenType.IDENIFIER, "Expected variable name")
+        name = self.consume(TokenType.IDENTIFIER, "Expected variable name")
         initializer = None
 
         if self.match((TokenType.EQUAL,)):
@@ -127,7 +127,7 @@ class Parser:
             return Expr.Literal(self.previous().literal)
 
         if self.match((TokenType.IDENTIFIER,)):
-            return Expr.Variable(self.previous())
+            return Expr.Variable(self.peek())
 
         if self.match((TokenType.LEFT_PAREN,)):
             expr = self.expression()
