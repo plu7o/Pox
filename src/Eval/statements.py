@@ -4,9 +4,9 @@ from os import name
 
 class Stmt(ABC):
     class Visitor(ABC):
-        # @abstractmethod
-        # def visit_block_stmt(self, stmt):
-        #    pass
+        @abstractmethod
+        def visit_block_stmt(self, stmt):
+            pass
 
         # @abstractmethod
         # def visit_class_stmt(self, stmt):
@@ -45,7 +45,7 @@ class Stmt(ABC):
         pass
 
     class Block:
-        def __init__(self, statements):
+        def __init__(self, statements: list):
             self.statements = statements
 
         def accept(self, visitor):
