@@ -4,13 +4,13 @@ from Lexer.token import Token
 from Lexer.token_type import TokenType
 from Eval.expressions import Expr
 from Parser.ast_printer import AstPrinter
-from Parser.parser import Parser
 from Interpreter.interpreter import Interpreter
 from Errors.runtime_error import Runtime_error
+from Parser.parser import Parser
 
 
 class Pox:
-    def __init__(self) -> None:
+    def __init__(self):
         self.had_error = False
         self.had_runtime_error = False
         self.interpreter = Interpreter()
@@ -56,30 +56,25 @@ class Pox:
 
         self.interpreter.interpret(statements)
 
-    @classmethod
-    def lexer_error(cls, line: int, message: str) -> None:
-        def report(line: int, where: str, message: str):
-            print(f"[Line: {line}] Error {where}: {message}")
-            cls.had_error = True
+    def report(self, line: int, where: str, message: str):
+        print(f"[Line: {line}] Error {where}: {message}")
+        self.had_error = True
 
-        report(line, "", message)
+    def lexer_error(self, line: int, message: str) -> None:
+        self.report(line, "", message)
 
-    @classmethod
-    def parse_error(cls, token: Token, message: str) -> None:
-        def report(line: int, where: str, message: str):
-            print(f"[Line: {line}] Error {where}: {message}")
-            cls.had_error = True
-
+    def parse_error(self, token: Token, message: str) -> None:
         if token.token_type == TokenType.EOF:
-            report(token.line, " at end", message)
+            self.report(token.line, " at end", message)
         else:
-            report(token.line, f' at "{token.lexeme}"', message)
+            self.report(token.line, f' at "{token.lexeme}"', message)
 
-    @classmethod
-    def runtime_error(cls, error: Runtime_error):
+    def runtime_error(self, error: Runtime_error):
         print(f'[Line {error.token.line}]: Runtime Error: {error.message}')
-        cls.had_runtime_error = True
+        self.had_runtime_error = True
 
 
-if __name__ == "__main__":
-    Pox().main()
+pox = Pox()
+
+
+

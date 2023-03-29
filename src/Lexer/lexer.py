@@ -1,5 +1,6 @@
 from .token import Token
 from .token_type import TokenType
+import pox as Pox
 
 
 class Lexer:
@@ -62,9 +63,9 @@ class Lexer:
             case "/":
                 if self.match("*"):
                     while (
-                        not self.match("*")
-                        and self.peek_next() != "/"
-                        and not self.is_at_eof()
+                            not self.match("*")
+                            and self.peek_next() != "/"
+                            and not self.is_at_eof()
                     ):
                         if self.peek() == "\n":
                             self.line += 1
@@ -72,9 +73,7 @@ class Lexer:
                         self.advance()
 
                     if self.is_at_eof():
-                        from pox import Pox
-
-                        Pox.lexer_error(self.line, f"Unterminated block comment found.")
+                        Pox.pox.lexer_error(self.line, f"Unterminated block comment found.")
 
                     else:
                         self.advance()
@@ -114,15 +113,13 @@ class Lexer:
                 elif self.is_alpha(c):
                     self.identifier()
                 else:
-                    from pox import Pox
-
-                    Pox.lexer_error(self.line, f'Unexpected character found: "{c}"')
+                    Pox.pox.lexer_error(self.line, f'Unexpected character found: "{c}"')
 
     def identifier(self) -> None:
         while self.is_alpha_numeric(self.peek()):
             self.advance()
 
-        text = self.source[self.start : self.current]
+        text = self.source[self.start: self.current]
         kind = self.keywords[text] if text in self.keywords else TokenType.IDENTIFIER
 
         self.add_token(kind)
@@ -136,7 +133,7 @@ class Lexer:
             while self.is_digit(self.peek()):
                 self.advance()
 
-        self.add_token(TokenType.NUMBER, float(self.source[self.start : self.current]))
+        self.add_token(TokenType.NUMBER, float(self.source[self.start: self.current]))
 
     def string(self) -> None:
         while self.peek() != "'" and not self.is_at_eof():
@@ -146,14 +143,14 @@ class Lexer:
             self.advance()
 
         if self.is_at_eof():
-            from pox import Pox
+            Pox.pox.lexer_error(self.line, f"Unterminated string.")
+            return
 
-            Pox.lexer_error(self.line, f"Unterminated string.")
+        # Closing '
+        self.advance()
 
-        else:
-            self.advance()
-            value = self.source[self.start + 1 : self.current - 1].strip("'")
-            self.add_token(TokenType.STRING, value)
+        value = self.source[self.start + 1: self.current - 1].strip("'")
+        self.add_token(TokenType.STRING, value)
 
     def match(self, expected: str) -> bool:
         if self.is_at_eof():
@@ -192,5 +189,5 @@ class Lexer:
         return self.source[self.current - 1]
 
     def add_token(self, kind: TokenType, literal: object = None) -> None:
-        text = self.source[self.start : self.current]
+        text = self.source[self.start: self.current]
         self.tokens.append(Token(kind, text, literal, self.line))

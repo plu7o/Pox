@@ -50,3 +50,4 @@ class TokenType(Enum):
 
     # End of File
     EOF = auto()
+

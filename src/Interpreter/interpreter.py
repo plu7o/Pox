@@ -4,6 +4,7 @@ from Lexer.token_type import TokenType
 from Lexer.token import Token
 from Errors.runtime_error import Runtime_error
 from Env.environment import Environment
+import pox as Pox
 
 
 class Interpreter(Expr.Visitor, Stmt.Visitor):
@@ -15,12 +16,7 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
             for statement in statements:
                 self.execute(statement)
         except Runtime_error as error:
-            from pox import Pox
-
-            Pox.runtime_error(error)
-
-    def visit_assign_expr(self, expr):
-        raise NotImplemented
+            Pox.pox.runtime_error(error)
 
     def visit_literal_expr(self, expr: Expr.Literal) -> object:
         return expr.value
@@ -99,16 +95,18 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         finally:
             self.env = previous
 
-    def visit_block_stmt(stmt: Stmt.Block):
+    def visit_block_stmt(self, stmt: Stmt.Block):
         self.execute_block(stmt.statements, Environment(self.env))
         return None
 
     def visit_expression_stmt(self, stmt: Stmt.Expression):
         self.evaluate(stmt.expression)
+        return None
 
     def visit_print_stmt(self, stmt: Stmt.Print):
         value = self.evaluate(stmt.expression)
         print(self.stringify(value))
+        return None
 
     def visit_var_stmt(self, stmt: Stmt.Var):
         value = None

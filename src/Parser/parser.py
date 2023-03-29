@@ -2,11 +2,12 @@ from Lexer.token_type import TokenType
 from Lexer.token import Token
 from Eval.expressions import Expr
 from Eval.statements import Stmt
+from Errors.runtime_error import Runtime_error
+import pox as Pox
 
 
-class Parse_error(Exception):
+class Parse_error(Runtime_error):
     pass
-
 
 class Parser:
     def __init__(self, tokens: list[Token]) -> None:
@@ -61,6 +62,7 @@ class Parser:
     def expression_statement(self) -> Stmt:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, 'Expected ";" after expression.')
+        return Stmt.Expression(expr)
 
     def block(self) -> list[Stmt]:
         statements = []
@@ -75,7 +77,7 @@ class Parser:
         expr = self.equality()
 
         if self.match((TokenType.EQUAL,)):
-            euqals = self.previous()
+            equals = self.previous()
             value = self.assignment()
 
             if isinstance(expr, Expr.Variable):
@@ -100,12 +102,10 @@ class Parser:
         expr = self.term()
 
         while self.match(
-            (
-                TokenType.GREATER,
-                TokenType.GREATER_EQUAL,
-                TokenType.LESS,
-                TokenType.LESS_EQUAL,
-            )
+                (TokenType.GREATER,
+                 TokenType.GREATER_EQUAL,
+                 TokenType.LESS,
+                 TokenType.LESS_EQUAL)
         ):
             operator = self.previous()
             right = self.term()
@@ -155,7 +155,7 @@ class Parser:
             return Expr.Literal(self.previous().literal)
 
         if self.match((TokenType.IDENTIFIER,)):
-            return Expr.Variable(self.peek())
+            return Expr.Variable(self.previous())
 
         if self.match((TokenType.LEFT_PAREN,)):
             expr = self.expression()
@@ -175,12 +175,12 @@ class Parser:
     def consume(self, token_type: TokenType, message: str) -> Token:
         if self.check(token_type):
             return self.advance()
-
-        raise self.error(self.peek(), message)
+        self.error(self.peek(), message)
 
     def check(self, token_type: TokenType) -> bool:
         if self.is_at_end():
             return False
+        t = self.peek().token_type
         return self.peek().token_type == token_type
 
     def advance(self) -> Token:
@@ -195,13 +195,11 @@ class Parser:
         return self.tokens[self.current]
 
     def previous(self) -> Token:
-        return self.tokens[self.current - 1] if self.current > 0 else self.tokens[0]
+        return self.tokens[self.current - 1]
 
     def error(self, token: Token, message: str) -> Parse_error:
-        from pox import Pox
-
-        Pox.parse_error(token, message)
-        return Parse_error()
+        Pox.pox.parse_error(token, message)
+        raise Parse_error()
 
     def sync(self):
         self.advance()
