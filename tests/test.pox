@@ -7,3 +7,10 @@ let a = 1;
 print 'hi' or 2;
 print Nil or 'yes';
 
+{
+  let i = 0;
+  while (i < 10) {
+    print i;
+    i = i + 1;
+  }
+}

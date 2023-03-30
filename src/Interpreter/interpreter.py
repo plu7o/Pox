@@ -71,10 +71,10 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
             return False
 
         if isinstance(obj, bool):
-            return True
-
+            return obj
+        
         return True
-
+        
     def is_equal(self, a: object, b: object) -> bool:
         if a == None and b == None:
             return True
@@ -141,6 +141,11 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
             value = self.evaluate(stmt.initializer)
 
         self.env.define(stmt.name.lexeme, value)
+        return None
+
+    def visit_while_stmt(self, stmt: Stmt.While):
+        while self.is_truthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.body)
         return None
 
     def visit_assign_expr(self, expr: Expr.Assign) -> object:
