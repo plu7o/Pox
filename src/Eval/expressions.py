@@ -28,9 +28,9 @@ class Expr(ABC):
         def visit_literal_expr(self, expr):
             pass
 
-        # @abstractmethod
-        # def visit_logical_expr(self, expr):
-        #    pass
+        @abstractmethod
+        def visit_logical_expr(self, expr):
+            pass
 
         # @abstractmethod
         # def visit_set_expr(self, expr):
@@ -106,3 +106,12 @@ class Expr(ABC):
 
         def accept(self, visitor):
             return visitor.visit_unary_expr(self)
+
+    class Logical:
+        def __init__(self, left, operator, right) -> None:
+            self.left = left
+            self.operator = operator
+            self.right = right
+
+        def accept(self, visitor):
+            return visitor.visit_logical_expr(self)

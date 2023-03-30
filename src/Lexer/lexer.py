@@ -1,6 +1,5 @@
 from .token import Token
 from .token_type import TokenType
-import pox as Pox
 
 
 class Lexer:
@@ -73,6 +72,7 @@ class Lexer:
                         self.advance()
 
                     if self.is_at_eof():
+                        import pox as Pox
                         Pox.pox.lexer_error(self.line, f"Unterminated block comment found.")
 
                     else:
@@ -113,6 +113,7 @@ class Lexer:
                 elif self.is_alpha(c):
                     self.identifier()
                 else:
+                    import pox as Pox
                     Pox.pox.lexer_error(self.line, f'Unexpected character found: "{c}"')
 
     def identifier(self) -> None:
@@ -143,6 +144,7 @@ class Lexer:
             self.advance()
 
         if self.is_at_eof():
+            import pox as Pox
             Pox.pox.lexer_error(self.line, f"Unterminated string.")
             return
 

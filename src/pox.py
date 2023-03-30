@@ -3,6 +3,7 @@ from Lexer.lexer import Lexer
 from Lexer.token import Token
 from Lexer.token_type import TokenType
 from Eval.expressions import Expr
+from Eval.statements import Stmt
 from Parser.ast_printer import AstPrinter
 from Interpreter.interpreter import Interpreter
 from Errors.runtime_error import Runtime_error
@@ -36,7 +37,7 @@ class Pox:
             sys.exit(1)
 
     def runPrompt(self):
-        print("POX Repl V.01")
+        print("POX Repl V0.4")
         while True:
             line = input("Pox: >> ")
             if line == "exit":
@@ -50,6 +51,10 @@ class Pox:
         tokens = lexer.scan_tokens()
         parser = Parser(tokens)
         statements = parser.parse()
+
+        for stmt in statements:
+            if isinstance(stmt, Stmt.Expression):
+                print(self.interpreter.evaluate(stmt.expression))
 
         if self.had_error:
             return

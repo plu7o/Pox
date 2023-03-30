@@ -4,7 +4,6 @@ from Lexer.token_type import TokenType
 from Lexer.token import Token
 from Errors.runtime_error import Runtime_error
 from Env.environment import Environment
-import pox as Pox
 
 
 class Interpreter(Expr.Visitor, Stmt.Visitor):
@@ -16,10 +15,24 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
             for statement in statements:
                 self.execute(statement)
         except Runtime_error as error:
+            import pox as Pox
+
             Pox.pox.runtime_error(error)
 
     def visit_literal_expr(self, expr: Expr.Literal) -> object:
         return expr.value
+
+    def visit_logical_expr(self, expr: Expr.Logical) -> object:
+        left = self.evaluate(expr.left)
+
+        if expr.operator.token_type == TokenType.OR:
+            if self.is_truthy(left):
+                return left
+        else:
+            if not self.is_truthy(left):
+                return left
+
+        return self.evaluate(expr.right)
 
     def visit_grouping_expr(self, expr: Expr.Grouping) -> object:
         return self.evaluate(expr.expression)
@@ -36,7 +49,12 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         return None
 
     def visit_variable_expr(self, expr: Expr.Variable):
-        return self.env.get(expr.name)
+        value = self.env.get(expr.name)
+        if value == None:
+            raise Runtime_error(
+                expr.name, f'Can\'t access uninitialized variable "{expr.name.lexeme}".'
+            )
+        return value
 
     def check_number_operand(self, operator: Token, operand: object) -> None:
         if isinstance(operand, float):
@@ -101,6 +119,15 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
 
     def visit_expression_stmt(self, stmt: Stmt.Expression):
         self.evaluate(stmt.expression)
+        return None
+
+    def visit_if_stmt(self, stmt: Stmt.If):
+        if self.is_truthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.then_branch)
+
+        elif stmt.else_branch != None:
+            self.execute(stmt.else_branch)
+
         return None
 
     def visit_print_stmt(self, stmt: Stmt.Print):

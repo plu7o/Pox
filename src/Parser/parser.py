@@ -1,13 +1,14 @@
+from sys import exec_prefix
 from Lexer.token_type import TokenType
 from Lexer.token import Token
 from Eval.expressions import Expr
 from Eval.statements import Stmt
 from Errors.runtime_error import Runtime_error
-import pox as Pox
 
 
 class Parse_error(Runtime_error):
     pass
+
 
 class Parser:
     def __init__(self, tokens: list[Token]) -> None:
@@ -26,7 +27,7 @@ class Parser:
 
     def declaration(self) -> Stmt:
         try:
-            if self.match((TokenType.LET,)):
+            if self.match(TokenType.LET):
                 return self.var_declaration()
 
             return self.statement()
@@ -36,13 +37,28 @@ class Parser:
             return None
 
     def statement(self) -> Stmt:
-        if self.match((TokenType.PRINT,)):
+        if self.match(TokenType.IF):
+            return self.if_statement()
+
+        if self.match(TokenType.PRINT):
             return self.print_statement()
 
-        if self.match((TokenType.LEFT_BRACE,)):
+        if self.match(TokenType.LEFT_BRACE):
             return Stmt.Block(self.block())
 
         return self.expression_statement()
+
+    def if_statement(self) -> Stmt:
+        self.consume(TokenType.LEFT_PAREN, 'Expected "(" after "if".')
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, 'Expected ")" after if condition.')
+
+        then_branch = self.statement()
+        else_branch = None
+        if self.match(TokenType.ELSE):
+            else_branch = self.statement()
+
+        return Stmt.If(condition, then_branch, else_branch)
 
     def print_statement(self) -> Stmt:
         value = self.expression()
@@ -53,7 +69,7 @@ class Parser:
         name = self.consume(TokenType.IDENTIFIER, "Expected variable name")
         initializer = None
 
-        if self.match((TokenType.EQUAL,)):
+        if self.match(TokenType.EQUAL):
             initializer = self.expression()
 
         self.consume(TokenType.SEMICOLON, 'Expected ";" after variable declaration')
@@ -74,9 +90,9 @@ class Parser:
         return statements
 
     def assignment(self) -> Expr:
-        expr = self.equality()
+        expr = self.logical_or()
 
-        if self.match((TokenType.EQUAL,)):
+        if self.match(TokenType.EQUAL):
             equals = self.previous()
             value = self.assignment()
 
@@ -88,10 +104,30 @@ class Parser:
 
         return expr
 
+    def logical_or(self) -> Expr:
+        expr = self.logical_and()
+
+        while self.match(TokenType.OR):
+            operator = self.previous()
+            right = self.logical_and()
+            expr = Expr.Logical(expr, operator, right)
+
+        return expr
+
+    def logical_and(self) -> Expr:
+        expr = self.equality()
+
+        while self.match(TokenType.AND):
+            operator = self.previous()
+            right = self.equality()
+            expr = Expr.Logical(expr, operator, right)
+
+        return expr
+
     def equality(self) -> Expr:
         expr = self.comparison()
 
-        while self.match((TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)):
+        while self.match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL):
             operator = self.previous()
             right = self.comparison()
             expr = Expr.Binary(expr, operator, right)
@@ -102,10 +138,10 @@ class Parser:
         expr = self.term()
 
         while self.match(
-                (TokenType.GREATER,
-                 TokenType.GREATER_EQUAL,
-                 TokenType.LESS,
-                 TokenType.LESS_EQUAL)
+            TokenType.GREATER,
+            TokenType.GREATER_EQUAL,
+            TokenType.LESS,
+            TokenType.LESS_EQUAL,
         ):
             operator = self.previous()
             right = self.term()
@@ -116,7 +152,7 @@ class Parser:
     def term(self) -> Expr:
         expr = self.factor()
 
-        while self.match((TokenType.MINUS, TokenType.PLUS)):
+        while self.match(TokenType.MINUS, TokenType.PLUS):
             operator = self.previous()
             right = self.factor()
             expr = Expr.Binary(expr, operator, right)
@@ -126,7 +162,7 @@ class Parser:
     def factor(self) -> Expr:
         expr = self.unary()
 
-        while self.match((TokenType.SLASH, TokenType.STAR)):
+        while self.match(TokenType.SLASH, TokenType.STAR):
             operator = self.previous()
             right = self.unary()
             expr = Expr.Binary(expr, operator, right)
@@ -134,7 +170,7 @@ class Parser:
         return expr
 
     def unary(self) -> Expr:
-        if self.match((TokenType.BANG, TokenType.MINUS)):
+        if self.match(TokenType.BANG, TokenType.MINUS):
             operator = self.previous()
             right = self.unary()
             return Expr.Unary(operator, right)
@@ -142,29 +178,29 @@ class Parser:
         return self.primary()
 
     def primary(self) -> Expr:
-        if self.match((TokenType.FALSE,)):
+        if self.match(TokenType.FALSE):
             return Expr.Literal(False)
 
-        if self.match((TokenType.TRUE,)):
+        if self.match(TokenType.TRUE):
             return Expr.Literal(True)
 
-        if self.match((TokenType.NIL,)):
+        if self.match(TokenType.NIL):
             return Expr.Literal(None)
 
-        if self.match((TokenType.NUMBER, TokenType.STRING)):
+        if self.match(TokenType.NUMBER, TokenType.STRING):
             return Expr.Literal(self.previous().literal)
 
-        if self.match((TokenType.IDENTIFIER,)):
+        if self.match(TokenType.IDENTIFIER):
             return Expr.Variable(self.previous())
 
-        if self.match((TokenType.LEFT_PAREN,)):
+        if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, 'Expected ")" after expression.')
             return Expr.Grouping(expr)
 
         raise self.error(self.peek(), "Expected expression.")
 
-    def match(self, types: tuple[TokenType]) -> bool:
+    def match(self, *types) -> bool:
         for token_type in types:
             if self.check(token_type):
                 self.advance()
@@ -198,6 +234,8 @@ class Parser:
         return self.tokens[self.current - 1]
 
     def error(self, token: Token, message: str) -> Parse_error:
+        import pox as Pox
+
         Pox.pox.parse_error(token, message)
         raise Parse_error()
 

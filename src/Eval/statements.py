@@ -20,9 +20,9 @@ class Stmt(ABC):
         # def visit_function_stmt(self, stmt):
         #    pass
 
-        # @abstractmethod
-        # def visit_if_stmt(self, stmt):
-        #    pass
+        @abstractmethod
+        def visit_if_stmt(self, stmt):
+            pass
 
         @abstractmethod
         def visit_print_stmt(self, stmt):
@@ -36,8 +36,8 @@ class Stmt(ABC):
         def visit_var_stmt(self, stmt):
             pass
 
-        # @abstractmethod
-        # def visit_while_stmt(self, stmt):
+        #@abstractmethod
+        #def visit_while_stmt(self, stmt):
         #    pass
 
     @abstractmethod
@@ -72,3 +72,20 @@ class Stmt(ABC):
 
         def accept(self, visitor):
             return visitor.visit_var_stmt(self)
+
+    class If:
+        def __init__(self, condition, then_branch, else_branch):
+            self.condition = condition
+            self.then_branch = then_branch
+            self.else_branch = else_branch
+
+        def accept(self, visitor):
+            return visitor.visit_if_stmt(self)
+
+    class While:
+        def __init__(self, condition, body):
+            self.condition = condition
+            self.body = body
+
+        def accept(self, visitor):
+            return visitor.visit_while_stmt(self)
