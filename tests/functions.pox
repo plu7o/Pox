@@ -1,0 +1,5 @@
+fn hi(first, last) {
+    print 'Hi, ' + first + ' ' + last + '!';
+}
+
+hi('Dear', 'Reader');

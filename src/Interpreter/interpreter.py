@@ -4,11 +4,27 @@ from Lexer.token_type import TokenType
 from Lexer.token import Token
 from Errors.runtime_error import Runtime_error
 from Env.environment import Environment
+from Functions.pox_callable import PoxCallable
+from Functions.pox_function import PoxFunction
+import time
 
 
 class Interpreter(Expr.Visitor, Stmt.Visitor):
     def __init__(self) -> None:
-        self.env = Environment()
+        self.global_env = Environment()
+        self.env = self.global_env
+        self.global_env.define(
+            "clock",
+            type(
+                "Clock",
+                (PoxCallable,),
+                {
+                    "arity": lambda self: 0,
+                    "calll": lambda self, interpreter, arguments: time.time(),
+                    "__repr__": lambda self: "<native fn>",
+                },
+            ),
+        )
 
     def interpret(self, statements: list[Stmt]):
         try:
@@ -72,9 +88,9 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
 
         if isinstance(obj, bool):
             return obj
-        
+
         return True
-        
+
     def is_equal(self, a: object, b: object) -> bool:
         if a == None and b == None:
             return True
@@ -119,6 +135,11 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
 
     def visit_expression_stmt(self, stmt: Stmt.Expression):
         self.evaluate(stmt.expression)
+        return None
+
+    def visit_function_stmt(self, stmt: Stmt.Function):
+        function = PoxFunction(stmt)
+        self.env.define(stmt.name.lexeme, function)
         return None
 
     def visit_if_stmt(self, stmt: Stmt.If):
@@ -198,3 +219,23 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
 
         # unreachable
         return None
+
+    def visit_call_expr(self, expr: Expr.Call) -> object:
+        callee = self.evaluate(expr.callee)
+
+        args = []
+        for arg in expr.arguments:
+            args.append(self.evaluate(arg))
+
+        if not isinstance(callee, PoxCallable):
+            raise Runtime_error(expr.paren, "Can only call function and classes.")
+
+        function = callee
+
+        if len(args) != function.arity():
+            raise Runtime_error(
+                expr.paren,
+                f"Expected {function.arity()} arguments but got {len(args)}.",
+            )
+
+        return function.call(self, args)

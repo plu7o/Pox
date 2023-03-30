@@ -16,9 +16,9 @@ class Stmt(ABC):
         def visit_expression_stmt(self, stmt):
             pass
 
-        # @abstractmethod
-        # def visit_function_stmt(self, stmt):
-        #    pass
+        @abstractmethod
+        def visit_function_stmt(self, stmt):
+            pass
 
         @abstractmethod
         def visit_if_stmt(self, stmt):
@@ -89,3 +89,12 @@ class Stmt(ABC):
 
         def accept(self, visitor):
             return visitor.visit_while_stmt(self)
+
+    class Function:
+        def __init__(self, name, params, body):
+            self.name = name
+            self.params = params
+            self.body = body
+
+        def accept(self, visitor):
+            return visitor.visit_function_stmt(self)

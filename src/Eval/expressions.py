@@ -12,9 +12,9 @@ class Expr(ABC):
         def visit_binary_expr(self, expr):
             pass
 
-        # @abstractmethod
-        # def visit_call_expr(self, expr):
-        #    pass
+        @abstractmethod
+        def visit_call_expr(self, expr):
+            pass
 
         # @abstractmethod
         # def visit_get_expr(self, expr):
@@ -115,3 +115,12 @@ class Expr(ABC):
 
         def accept(self, visitor):
             return visitor.visit_logical_expr(self)
+
+    class Call:
+        def __init__(self, callee, paren, arguments: list) -> None:
+            self.callee = callee
+            self.paren = paren
+            self.arguments = arguments
+
+        def accept(self, visitor):
+            return visitor.visit_call_expr(self)

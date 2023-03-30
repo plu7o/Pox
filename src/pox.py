@@ -43,18 +43,19 @@ class Pox:
             if line == "exit":
                 break
 
-            self.run(line)
+            self.run(line, repl=True)
             self.had_error = False
 
-    def run(self, source: str) -> None:
+    def run(self, source: str, repl=False) -> None:
         lexer = Lexer(source)
         tokens = lexer.scan_tokens()
         parser = Parser(tokens)
         statements = parser.parse()
 
-        for stmt in statements:
-            if isinstance(stmt, Stmt.Expression):
-                print(self.interpreter.evaluate(stmt.expression))
+        if repl:
+            for stmt in statements:
+                if isinstance(stmt, Stmt.Expression):
+                    print(self.interpreter.evaluate(stmt.expression))
 
         if self.had_error:
             return
