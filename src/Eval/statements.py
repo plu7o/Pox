@@ -28,9 +28,9 @@ class Stmt(ABC):
         def visit_print_stmt(self, stmt):
             pass
 
-        # @abstractmethod
-        # def visit_return_stmt(self, stmt):
-        #    pass
+        @abstractmethod
+        def visit_return_stmt(self, stmt):
+            pass
 
         @abstractmethod
         def visit_var_stmt(self, stmt):
@@ -98,3 +98,11 @@ class Stmt(ABC):
 
         def accept(self, visitor):
             return visitor.visit_function_stmt(self)
+
+    class Return:
+        def __init__(self, keyword, value):
+            self.keyword = keyword
+            self.value = value
+
+        def accept(self, visitor):
+            return visitor.visit_return_stmt(self)

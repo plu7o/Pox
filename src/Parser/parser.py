@@ -1,5 +1,3 @@
-from io import IncrementalNewlineDecoder
-from sys import exec_prefix
 from Lexer.token_type import TokenType
 from Lexer.token import Token
 from Eval.expressions import Expr
@@ -48,6 +46,9 @@ class Parser:
 
         if self.match(TokenType.PRINT):
             return self.print_statement()
+        
+        if self.match(TokenType.RETURN):
+            return self.return_statement()
 
         if self.match(TokenType.WHILE):
             return self.while_statement()
@@ -110,6 +111,15 @@ class Parser:
         value = self.expression()
         self.consume(TokenType.SEMICOLON, 'Expected ";" after value')
         return Stmt.Print(value)
+
+    def return_statement(self) -> Stmt:
+        keyword = self.previous()
+        value = None
+        if not self.check(TokenType.SEMICOLON):
+            value = self.expression()
+
+        self.consume(TokenType.SEMICOLON, 'Expected ";" after return value.')
+        return Stmt.Return(keyword, value)
 
     def var_declaration(self) -> Stmt:
         name = self.consume(TokenType.IDENTIFIER, "Expected variable name")

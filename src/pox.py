@@ -53,9 +53,7 @@ class Pox:
         statements = parser.parse()
 
         if repl:
-            for stmt in statements:
-                if isinstance(stmt, Stmt.Expression):
-                    print(self.interpreter.evaluate(stmt.expression))
+            pass
 
         if self.had_error:
             return

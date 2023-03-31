@@ -6,6 +6,7 @@ from Errors.runtime_error import Runtime_error
 from Env.environment import Environment
 from Functions.pox_callable import PoxCallable
 from Functions.pox_function import PoxFunction
+from Functions.pox_return import PoxReturn
 import time
 
 
@@ -20,7 +21,7 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
                 (PoxCallable,),
                 {
                     "arity": lambda self: 0,
-                    "calll": lambda self, interpreter, arguments: time.time(),
+                    "call": lambda self, interpreter, arguments: time.time(),
                     "__repr__": lambda self: "<native fn>",
                 },
             ),
@@ -138,7 +139,7 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         return None
 
     def visit_function_stmt(self, stmt: Stmt.Function):
-        function = PoxFunction(stmt)
+        function = PoxFunction(stmt, self.env)
         self.env.define(stmt.name.lexeme, function)
         return None
 
@@ -155,6 +156,13 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         value = self.evaluate(stmt.expression)
         print(self.stringify(value))
         return None
+
+    def visit_return_stmt(self, stmt: Stmt.Return):
+        value = None
+        if stmt.value != None:
+            value = self.evaluate(stmt.value)
+
+        raise PoxReturn(value)
 
     def visit_var_stmt(self, stmt: Stmt.Var):
         value = None

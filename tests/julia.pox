@@ -1,0 +1,13 @@
+fn iljulia(n) {
+    for (let i = 0; i < n; i = i+1) {
+        print 'julia ist toll <3';
+        print 'liebe julia ' + i + ' mal! <3';
+    }
+}
+
+iljulia(101);
+
+
+let x = 10;
+
+print x + 5;
