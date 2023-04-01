@@ -9,7 +9,7 @@ class PoxFunction(PoxCallable):
         self.closure = closure
 
     def call(self, interpreter, arguments: list) -> object:
-        env = Environment(interpreter.global_env)
+        env = Environment(self.closure)
 
         for i in range(len(self.declaration.params)):
             env.define(self.declaration.params[i].lexeme, arguments[i])
