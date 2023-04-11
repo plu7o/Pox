@@ -50,10 +50,26 @@ class Resolver(Expr.Visitor, Stmt.Visitor):
         self.end_scope()
         return None
 
+    def visit_expression_stmt(self, stmt: Stmt.Expression):
+        self.resolve_expr(stmt.expression)
+        return None
+
     def visit_function_stmt(self, stmt: Stmt.Function):
         self.declare(stmt.name)
         self.define(stmt.name)
         self.resolve_function(stmt)
+        return None
+
+    def visit_if_stmt(self, stmt: Stmt.If):
+        self.resolve_expr(stmt.condition)
+        self.resolve_stmt(stmt.then_branch)
+        if stmt.else_branch != None:
+            self.resolve_stmt(stmt.else_branch)
+        return None
+
+    def visit_print_stmt(self, stmt: Stmt.Print):
+        if stmt.value != None:
+            self.resolve_expr(stmt.value)
         return None
 
     def visit_var_stmt(self, stmt: Stmt.Var):
@@ -63,15 +79,49 @@ class Resolver(Expr.Visitor, Stmt.Visitor):
 
         self.define(stmt.name)
         return None
+    
+    def visit_while_stmt(self, stmt: Stmt.While):
+        self.resolve_expr(stmt.condition)
+        self.resolve(stmt.body)
+        return None
 
     def visit_assign_expr(self, expr: Expr.Assign):
-        self.resolve(expr.value)
+        self.resolve_expr(expr.value)
         self.resolve_local(expr, expr.name)
+        return None
+
+    def visit_binary_expr(self, expr: Expr.Binary):
+        self.resolve_expr(expr.left)
+        self.resolve_expr(expr.right)
+        return None
+
+    def vitis_call_expr(self, expr: Expr.Call):
+        self.resolve_expr(expr.callee)
+
+        for arg in expr.arguments:
+            self.resolve_expr(arg)
+
+        return None
+
+    def visit_group_expr(self, expr: Expr.Grouping):
+        self.resolve_expr(expr.expression)
+        return None
+
+    def visit_literal_expr(self, expr: Expr.Literal):
+        return None
+
+    def visit_logical_expr(self, expr: Expr.Logical):
+        self.resolve_expr(expr.left)
+        self.resolve_expr(expr.right)
+        return None
+
+    def visit_unary_expr(self, expr: Expr.Unary):
+        self.resolve_expr(expr.right)
         return None
 
     def visit_variable_expr(self, expr: Expr.Variable):
         if len(self.scopes) == 0 and self.scopes[0][expr.name.lexeme] == False:
-            import pox as pox
+            import pox as Pox
 
             Pox.pox.parse_error(
                 expr.name, "Can't read local Variable in its own initializer."
